@@ -1,0 +1,68 @@
+#da3
+
+class Item:
+    """
+    Class to represent an item with a given value and weight.
+    """
+    def __init__(self, value, weight):
+        self.value = value
+        self.weight = weight
+
+def fractional_knapsack(items, capacity):
+    """
+    Calculate the maximum value that can be carried in the knapsack
+    by taking either whole items or fractions of items.
+
+    :param items: List of Item objects, each with a value and weight
+    :param capacity: Total weight capacity of the knapsack
+    :return: Maximum value achievable within the given capacity
+    """
+    # Sort items based on value-to-weight ratio in descending order
+    items.sort(key=lambda item: item.value / item.weight, reverse=True)
+    
+    total_value = 0.0  # Initialize total value to 0
+    for item in items:
+        if capacity > 0 and item.weight <= capacity:
+            # If the item can be fully taken, take it
+            capacity -= item.weight
+            total_value += item.value
+        else:
+            # If only a fraction of the item can be taken, take what fits
+            fraction = capacity / item.weight
+            total_value += item.value * fraction
+            break  # Knapsack is filled, exit the loop
+
+    return total_value
+
+def main():
+    # Input number of items
+    n = int(input("Enter the number of items: "))
+    items = []
+
+    # Input each item's value and weight
+    for i in range(n):
+        value = float(input(f"Enter value of item {i + 1}: "))
+        weight = float(input(f"Enter weight of item {i + 1}: "))
+        items.append(Item(value, weight))
+
+    # Input capacity of the knapsack
+    capacity = float(input("Enter the capacity of the knapsack: "))
+
+    # Calculate maximum achievable value
+    max_value = fractional_knapsack(items, capacity)
+    print(f"The maximum value of items that can be carried: {max_value:.2f}")
+
+if __name__ == "__main__":
+    main()
+
+"""Output: 
+Enter the number of items: 3 
+Enter value of item 1: 60 
+Enter weight of item 1: 10 
+Enter value of item 2: 100 
+Enter weight of item 2: 20 
+Enter value of item 3: 120 
+Enter weight of item 3: 30 
+Enter the capacity of the knapsack: 50 
+The maximum value of items that can be carried: 240.0
+"""
