@@ -1,0 +1,413 @@
+Assignment-1
+
+import java.util.Scanner;
+
+class FibonacciSeries {
+  public static void fibonacciIterative(int n) {
+    int[] series = new int[n];
+    if (n >= 1)
+      series[0] = 0;
+    if (n >= 2)
+      series[1] = 1;
+
+    for (int i = 2; i < n; i++) {
+      series[i] = series[i - 1] + series[i - 2];
+    }
+
+    System.out.print("Fibonacci Series (Iterative): ");
+    for (int i = 0; i < n; i++) {
+      System.out.print(series[i] + " ");
+    }
+    System.out.println();
+  }
+
+  public static int fibonacciRecursive(int n) {
+    if (n <= 1) {
+      return n;
+    }
+    return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+  }
+
+  public static void printFibonacciSeriesRecursive(int n) {
+    System.out.print("Fibonacci Series (Recursive): ");
+    for (int i = 0; i < n; i++) {
+      System.out.print(fibonacciRecursive(i) + " ");
+    }
+    System.out.println();
+  }
+
+  public static void main(String[] args) {
+    Scanner scanner = new Scanner(System.in);
+
+    System.out.println("Enter the number of elements for the Fibonacci series: ");
+    int n = scanner.nextInt();
+
+    fibonacciIterative(n);
+    printFibonacciSeriesRecursive(n);
+
+    scanner.close();
+  }
+}
+
+
+
+Assignment-1
+
+
+import java.util.Scanner;
+
+class FibonacciCalculator {
+
+  // Step count variable
+  static int stepCountIterative = 0;
+  static int stepCountRecursive = 0;
+
+  // Iterative approach for Fibonacci
+  public static int fibonacciIterative(int n) {
+    if (n <= 1)
+      return n;
+
+    int a = 0, b = 1, c = 0;
+    for (int i = 2; i <= n; i++) {
+      stepCountIterative++;
+      c = a + b;
+      a = b;
+      b = c;
+    }
+    return c;
+  }
+
+  // Recursive approach with memoization
+  public static int fibonacciRecursive(int n, int[] memo) {
+    stepCountRecursive++;
+    if (n <= 1)
+      return n;
+    if (memo[n] != -1)
+      return memo[n];
+
+    memo[n] = fibonacciRecursive(n - 1, memo) + fibonacciRecursive(n - 2, memo);
+    return memo[n];
+  }
+
+  public static void main(String[] args) {
+    Scanner scanner = new Scanner(System.in);
+
+    System.out.print("Enter the Fibonacci index (n): ");
+    int n = scanner.nextInt();
+
+    // Iterative approach
+    long startIterative = System.nanoTime();
+    int fibIterative = fibonacciIterative(n);
+    long endIterative = System.nanoTime();
+
+    System.out.println("\nIterative Approach:");
+    System.out.println("Fibonacci(" + n + ") = " + fibIterative);
+    System.out.println("Step Count (Iterative): " + stepCountIterative);
+    System.out.println("Time taken (Iterative): " + (endIterative - startIterative) + " ns");
+    System.out.println("Space Complexity (Iterative): O(1)");
+
+    // Recursive approach with memoization
+    int[] memo = new int[n + 1];
+    for (int i = 0; i <= n; i++) {
+      memo[i] = -1;
+    }
+
+    long startRecursive = System.nanoTime();
+    int fibRecursive = fibonacciRecursive(n, memo);
+    long endRecursive = System.nanoTime();
+
+    System.out.println("\nRecursive Approach with Memoization:");
+    System.out.println("Fibonacci(" + n + ") = " + fibRecursive);
+    System.out.println("Step Count (Recursive): " + stepCountRecursive);
+    System.out.println("Time taken (Recursive): " + (endRecursive - startRecursive) + " ns");
+    System.out.println("Space Complexity (Recursive): O(n)");
+
+    scanner.close();
+  }
+}
+
+
+Assignment-2
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Scanner;
+
+class HuffmanNode {
+    char ch;
+    int freq;
+    HuffmanNode left, right;
+
+    HuffmanNode(char ch, int freq, HuffmanNode left, HuffmanNode right) {
+        this.ch = ch;
+        this.freq = freq;
+        this.left = left;
+        this.right = right;
+    }
+}
+
+class HuffmanEncoding {
+    private static Map<Character, String> huffmanCodes = new HashMap<>();
+    private static HuffmanNode root;
+
+    public static void buildHuffmanTree(String text) {
+
+        Map<Character, Integer> frequencyMap = new HashMap<>();
+        for (char ch : text.toCharArray()) {
+            frequencyMap.put(ch, frequencyMap.getOrDefault(ch, 0) + 1);
+        }
+
+        PriorityQueue<HuffmanNode> priorityQueue = new PriorityQueue<>((a, b) -> a.freq - b.freq);
+
+        for (Map.Entry<Character, Integer> entry : frequencyMap.entrySet()) {
+            priorityQueue.add(new HuffmanNode(entry.getKey(), entry.getValue(), null, null));
+        }
+
+        while (priorityQueue.size() > 1) {
+            HuffmanNode left = priorityQueue.poll();
+            HuffmanNode right = priorityQueue.poll();
+            int sum = left.freq + right.freq;
+            priorityQueue.add(new HuffmanNode('\0', sum, left, right));
+        }
+
+        root = priorityQueue.poll();
+
+        generateCodes(root, "");
+    }
+
+    private static void generateCodes(HuffmanNode node, String code) {
+        if (node == null)
+            return;
+
+        if (node.left == null && node.right == null) {
+            huffmanCodes.put(node.ch, code);
+        }
+
+        generateCodes(node.left, code + "0");
+        generateCodes(node.right, code + "1");
+    }
+
+    public static String encode(String text) {
+        StringBuilder encodedText = new StringBuilder();
+        for (char ch : text.toCharArray()) {
+            encodedText.append(huffmanCodes.get(ch));
+        }
+        return encodedText.toString();
+    }
+
+    public static String decode(String encodedText) {
+        StringBuilder decodedText = new StringBuilder();
+        HuffmanNode current = root;
+
+        for (int i = 0; i < encodedText.length(); i++) {
+            current = encodedText.charAt(i) == '0' ? current.left : current.right;
+
+            if (current.left == null && current.right == null) {
+                decodedText.append(current.ch);
+                current = root;
+            }
+        }
+        return decodedText.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the text to encode: ");
+        String text = scanner.nextLine();
+
+        buildHuffmanTree(text);
+
+        System.out.println("Huffman Codes: " + huffmanCodes);
+
+        String encodedText = encode(text);
+        System.out.println("Encoded Text: " + encodedText);
+
+        String decodedText = decode(encodedText);
+        System.out.println("Decoded Text: " + decodedText);
+        scanner.close();
+
+    }
+}
+
+
+assignment-3
+
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Scanner;
+
+class Item {
+    double weight, value, ratio;
+
+    Item(double weight, double value) {
+        this.weight = weight;
+        this.value = value;
+        this.ratio = value / weight; // value-to-weight ratio
+    }
+}
+
+class FractionalKnapsack {
+
+    public static double getMaxValue(Item[] items, double capacity) {
+        // Using an array to store step count as it can be modified within the
+        // Comparator
+        int[] stepCount = { 0 };
+
+        // Sort items by value-to-weight ratio in descending order
+        Arrays.sort(items, new Comparator<Item>() {
+            @Override
+            public int compare(Item a, Item b) {
+                stepCount[0]++;
+                return Double.compare(b.ratio, a.ratio);
+            }
+        });
+
+        double totalValue = 0.0;
+
+        for (Item item : items) {
+            if (capacity == 0)
+                break;
+
+            // If item can be fully added
+            if (item.weight <= capacity) {
+                stepCount[0]++;
+                capacity -= item.weight;
+                totalValue += item.value;
+            }
+            // If only a fraction of the item can be added
+            else {
+                stepCount[0]++;
+                totalValue += item.ratio * capacity;
+                capacity = 0; // knapsack is now full
+            }
+        }
+
+        System.out.println("Step Count: " + stepCount[0]);
+        return totalValue;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the number of items: ");
+        int n = scanner.nextInt();
+
+        Item[] items = new Item[n];
+
+        System.out.println("Enter the weight and value of each item:");
+        for (int i = 0; i < n; i++) {
+            System.out.print("Item " + (i + 1) + " Weight: ");
+            double weight = scanner.nextDouble();
+            System.out.print("Item " + (i + 1) + " Value: ");
+            double value = scanner.nextDouble();
+            items[i] = new Item(weight, value);
+        }
+
+        System.out.print("Enter the capacity of the knapsack: ");
+        double capacity = scanner.nextDouble();
+
+        long startTime = System.nanoTime();
+        double maxValue = getMaxValue(items, capacity);
+        long endTime = System.nanoTime();
+
+        System.out.println("\nMaximum value in the knapsack = " + maxValue);
+        System.out.println("Time taken (in nanoseconds): " + (endTime - startTime));
+        System.out.println("Time Complexity: O(n log n) due to sorting");
+        System.out.println("Space Complexity: O(n) for storing items array");
+
+        scanner.close();
+    }
+}
+
+
+Assignment-5
+
+
+import java.util.Scanner;
+
+class NQueens {
+
+    private int[][] board;
+    private int N;
+
+    public NQueens(int N, int row, int col) {
+        this.N = N;
+        this.board = new int[N][N];
+
+        board[row][col] = 1;
+    }
+
+    private boolean isSafe(int row, int col) {
+
+        for (int i = 0; i < row; i++) {
+            if (board[i][col] == 1)
+                return false;
+        }
+
+        for (int i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+            if (board[i][j] == 1)
+                return false;
+        }
+
+        for (int i = row, j = col; i >= 0 && j < N; i--, j++) {
+            if (board[i][j] == 1)
+                return false;
+        }
+
+        return true;
+    }
+
+    private boolean solveNQueens(int row) {
+
+        if (row >= N)
+            return true;
+
+        for (int col = 0; col < N; col++) {
+            if (isSafe(row, col)) {
+
+                board[row][col] = 1;
+
+                if (solveNQueens(row + 1))
+                    return true;
+
+                board[row][col] = 0;
+            }
+        }
+
+        return false;
+    }
+
+    private void printBoard() {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                System.out.print(board[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the size of the board (N): ");
+        int N = scanner.nextInt();
+
+        System.out.print("Enter the row for the first queen (0-indexed): ");
+        int row = scanner.nextInt();
+        System.out.print("Enter the column for the first queen (0-indexed): ");
+        int col = scanner.nextInt();
+
+        NQueens nQueens = new NQueens(N, row, col);
+
+        if (nQueens.solveNQueens(row + 1)) {
+            System.out.println("Solution for " + N + "-Queens:");
+            nQueens.printBoard();
+        } else {
+            System.out.println("No solution exists for the given initial position.");
+        }
+
+    }
+}
+
